@@ -46,6 +46,40 @@ func Insert(w http.ResponseWriter, r *http.Request) {
   }
 }
 
+func Edit(w http.ResponseWriter, r *http.Request) {
+  id := r.URL.Query().Get("id")
+
+  produto := models.Fetch(id)
+
+  templates.ExecuteTemplate(w, "edit", produto)
+}
+
+func Update(w http.ResponseWriter, r *http.Request) {
+  if r.Method == "POST" {
+    id := r.FormValue("id")
+    nome := r.FormValue("nome")
+    descricao := r.FormValue("descricao")
+    precoRaw := r.FormValue("preco")
+    quantidadeRaw := r.FormValue("quantidade")
+
+    preco, err := strconv.ParseFloat(precoRaw, 64)
+
+    if err != nil {
+      log.Println("Erro na conversão do preço: ", err)
+    }
+
+    quantidade, err := strconv.Atoi(quantidadeRaw)
+
+    if err != nil {
+      log.Println("Erro na conversão da quantidade: ", err)
+    }
+
+    models.UpdateProduct(id, nome, descricao, preco, quantidade)
+
+    http.Redirect(w, r, "/", 301)
+  }
+}
+
 func Remove(w http.ResponseWriter, r *http.Request) {
   id := r.URL.Query().Get("id")
 

@@ -49,6 +49,27 @@ func FetchAll() []Product {
   return produtos
 }
 
+func Fetch(id string) Product {
+  db := db.ConnectDb()
+  query, err := db.Query("SELECT * FROM products WHERE id = $1 ORDER BY id ASC", id)
+
+  if err != nil {
+    panic(err.Error())
+  }
+
+  var product Product
+
+  for query.Next() {
+    err := query.Scan(&product.Id, &product.Nome, &product.Descricao, &product.Preco, &product.Quantidade)
+
+    if err != nil {
+      panic(err.Error())
+    }
+  }
+
+  return product
+}
+
 func CreateNewProduct(nome string, descricao string, preco float64, quantidade int) {
   db := db.ConnectDb()
   defer db.Close()
@@ -60,6 +81,19 @@ func CreateNewProduct(nome string, descricao string, preco float64, quantidade i
   }
 
   query.Exec(nome, descricao, preco, quantidade)
+}
+
+func UpdateProduct(id string, nome string, descricao string, preco float64, quantidade int) {
+  db := db.ConnectDb()
+  defer db.Close()
+
+  query, err := db.Prepare("UPDATE products SET nome = $1, descricao = $2, preco = $3, quantidade = $4 WHERE id = $5")
+
+  if err != nil {
+    panic(err.Error())
+  }
+
+  query.Exec(nome, descricao, preco, quantidade, id)
 }
 
 func RemoveProduct(id string) {
