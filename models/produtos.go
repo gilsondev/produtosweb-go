@@ -37,6 +37,7 @@ func FetchAll() []Product {
       panic(err.Error())
     }
 
+    p.Id = id
     p.Nome = nome
     p.Descricao = descricao
     p.Preco = preco
@@ -59,4 +60,17 @@ func CreateNewProduct(nome string, descricao string, preco float64, quantidade i
   }
 
   query.Exec(nome, descricao, preco, quantidade)
+}
+
+func RemoveProduct(id string) {
+  db := db.ConnectDb()
+  defer db.Close()
+
+  query, err := db.Prepare("DELETE FROM products WHERE id = $1")
+
+  if err != nil {
+    panic(err.Error())
+  }
+
+  query.Exec(id)
 }
